@@ -1,0 +1,6 @@
+hydrokinetics = 25000psi
+
+viscocity: %%viscocity%%joules
+hydrostatics: %%hydrostatics%%MWh
+
+pressure: 18atm

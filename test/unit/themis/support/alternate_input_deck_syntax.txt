@@ -1,0 +1,4 @@
+hardness = 1 # UQP_VARIABLE = hardness
+
+standard_density = 2 # UQP_VARIABLE = density
+material = 3 # UQP_VARIABLE = material

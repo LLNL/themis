@@ -1,0 +1,4 @@
+hardness = 45.8
+
+standard_density = 1740
+material = phosphate

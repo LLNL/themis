@@ -1,0 +1,4 @@
+args,tasks,cores_per_task,batch_script,cwd
+/bin/echo foo bar,1,2,,step0
+/usr/bin/true,1,2,,step1
+/bin/echo foo bar,1,2,,step2
