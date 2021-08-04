@@ -505,4 +505,5 @@ Example of Good Convergence
 MCMC API
 ---------------
 
-.. figure:: fixme
+.. automodule:: uqp.uq_component.uqp_mcmc
+   :members: MCMC, DefaultMCMC, DiscrepancyMCMC
