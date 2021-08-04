@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+
+def hill_function(x,a,b,c):
+
+    return (a*x**c)/(x**c+b**c)
+
+if __name__ == "__main__":
+    print('foo')
