@@ -1,2 +1,5 @@
 # Python bytecode
 *.pyc 
+
+docs/build/**
+docs/source/_static/*.html

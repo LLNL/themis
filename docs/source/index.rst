@@ -1,5 +1,5 @@
-Pipeline Components Interface
-=============================
+Uncertainty Quantification Pipeline (UQP) Documentation
+=======================================================
 
 The UQP components interface is made up of the ``uqp`` and ``themis`` packages. The ``uqp`` package
 is made up of three subpackages, each with their own API.
@@ -41,9 +41,16 @@ For detail on each component, click on the links in the navigation menu on the l
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
+   :Caption: Contents
 
    sampling_component
    themis/index
-   surrogate_model
    uq_component
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
