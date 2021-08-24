@@ -1,0 +1,136 @@
+# This file is a template, and might need editing before it works on your project.
+# see https://docs.gitlab.com/ce/ci/yaml/README.html for all available options
+
+before_script:
+  - echo "Before script section"
+  - python2 -V  # Print out python version for debugging
+  - python3 -V  # Print out python version for debugging
+  - echo $NIGHTLY
+  - echo $WEEKLY
+  - echo $MONTHLY
+  - echo $CI_PROJECT_DIR
+  - echo $CI_COMMIT_BEFORE_SHA
+  - echo $CI_COMMIT_DESCRIPTION
+  - echo $CI_COMMIT_MESSAGE
+  - echo $CI_COMMIT_REF_NAME
+  - echo $CI_COMMIT_REF_PROTECTED
+  - echo $CI_COMMIT_REF_SLUG
+  - echo $CI_COMMIT_SHA
+  - echo $CI_COMMIT_SHORT_SHA
+  - echo $CI_COMMIT_TITLE
+  - echo $CI_COMMIT_TAG
+  - echo $CI_COMMIT_BRANCH
+  - echo $CI_PIPELINE_ID
+  - echo $CI_PIPELINE_IID
+  - echo $CI_PIPELINE_SOURCE
+  - echo $GITLAB_USER_ID
+  - echo $GITLAB_USER_LOGIN
+  - echo $GITLAB_USER_NAME
+  - echo $CI_PIPELINE_CREATED_AT
+  - export DATETIME=$(date "+%Y-%m-%dT%H:%M:%S")
+  - echo $DATETIME
+  - echo $LC_ZONE
+  - echo "whoami"
+  - whoami
+
+after_script:
+  - echo "End Test Run"
+   
+stages: 
+  - static analysis
+  - test
+
+black_on-commit:
+  stage: static analysis
+  rules:
+  - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    when: never
+  - if: '$CI_COMMIT_BRANCH == "master"'
+  allow_failure: true
+  tags:
+    - shell
+    - borax
+  script:
+    - files=$(git diff-tree --no-commit-id --name-only -r $CI_COMMIT_SHA)
+    - if [ ! -z "${files}" ]; then pythonfiles=$(find $files -type f \( -name "*.py" -print -o -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} + \)); fi
+    - echo $files
+    - echo $pythonfiles
+    - email=$(git show -s --format='%ae' $CI_COMMIT_SHA)
+    - echo $email
+    - source /usr/WS1/healy22/static_analysis_env/bin/activate
+    - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results for Commit $CI_COMMIT_SHA" | mail -a black_diff.txt -a black_report.txt -s "UQP On-Commit Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
+    - deactivate
+  artifacts:
+    when: always
+    paths:
+      - black_report.txt
+
+black_monthly:
+  stage: static analysis
+  rules:
+  - if: '$MONTHLY == "TRUE"'
+  allow_failure: true
+  tags:
+    - shell
+    - borax
+  script:
+    - pythonfiles=$(find core -type f \( -name "*.py" -print -o -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} + \))
+    - echo $pythonfiles
+    - email="healy22@llnl.gov domyancic1@llnl.gov"
+    - echo $email
+    - source /usr/WS1/healy22/static_analysis_env/bin/activate
+    - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results" | mail -a black_diff.txt -a black_report.txt -s "Monthly UQP Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
+    - deactivate
+  artifacts:
+    when: always
+    paths:
+      - black_report.txt
+
+quartz_test:
+  stage: test
+  rules:
+  - if: '$CI_COMMIT_BRANCH == "master"'
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  tags:
+    - quartz
+    - shell
+  script: 
+    - Xvfb :78 &
+    - JOBID=$!
+    - export DISPLAY=:78
+    - echo "Run Unit Tests"
+    - echo "./.gitlab/rununittests.sc"
+    - ./.gitlab/rununittests.sc .
+#   Kill Xvfb process
+    - kill -15 $JOBID || true
+#   Parse results
+    - echo "./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components"
+    - python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components
+  artifacts:
+    reports:
+      junit: quartz_results.xml
+
+borax_test:
+  stage: test
+  rules:
+  - if: '$CI_COMMIT_BRANCH == "master"'
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  tags:
+    - borax2
+    - shell
+  script: 
+    - Xvfb :79 &
+    - JOBID=$!
+    - export DISPLAY=:79
+    - echo "Run Unit Tests"
+    - echo "./.gitlab/rununittests.sc"
+    - ./.gitlab/rununittests.sc .
+#   Kill Xvfb process
+    - kill -15 $JOBID || true
+#   Parse results
+    - echo "python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components"
+    - python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components
+  artifacts:
+    reports:
+      junit: borax_results.xml
+
