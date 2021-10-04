@@ -1,5 +1,5 @@
 Sampler
 =======
 
-.. automodule:: uqp.sampling.sampler
+.. automodule:: sampling_methods.sampler
    :members:

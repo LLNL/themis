@@ -1,5 +1,5 @@
 Composite Samples
 =================
 
-.. automodule:: uqp.sampling.composite_samples
+.. automodule:: sampling_methods.composite_samples
    :members:
