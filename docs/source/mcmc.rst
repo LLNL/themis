@@ -353,7 +353,7 @@ The points were "observed" with random noise.
 This means that there is uncertainty about the exact values.
 
 Inverse UQ
-^^^^^^^^^^
+~~~~~~~~~~
 
 We want to determine the values of :math:`a`, :math:`b`, and :math:`c` which produce our known data.
 However, because our observed data has uncertainty associated with it, our determinations of these values will also have uncertainty.
@@ -361,7 +361,7 @@ The goal of IUQ or **Inverse Uncertainty Quantification** is to estimate unknown
 In other words, we want to find the most likely values for :math:`a`, :math:`b`, and :math:`c` which could produce our observed :math:`(x,y)` pairs.
 
 Surrogate Models
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 Using MCMC to do IUQ requires evaluating our function many times.
 For most problems of interest, the function we wish to evaluate is computationally expensive.
@@ -372,7 +372,7 @@ Then we train the surrogate model on these points.
 Because we have several observations we want to match, we will create several surrogate models; one for each observed :math:`(x,y)` pair.
 
 MCMC
-^^^^
+~~~~
 
 Once we have our surrogate models we can perform **Markov Chain Monte Carlo**.
 The purpose of MCMC is to sample from a distribution using a likelihood function.
@@ -382,7 +382,7 @@ This lets us sample from the joint distribution of :math:`a`, :math:`b`, and :ma
 At the end of sampling we should see the mean of our distribution be :math:`(a=3.238, b=0.6631, c=8.408)`
 
 MCMC IUQ Algorithm Explained to a child
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Pick :math:`a`, :math:`b`, and :math:`c` at random and save it.
 2. Evaluate all functions at that point.
@@ -395,7 +395,7 @@ MCMC IUQ Algorithm Explained to a child
 9. Go back to step 4 and repeat until enough points have been saved.
 
 MCMC IUQ Algorithm Explained to an adult
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. Pick a point :math:`X_{previous}` at random in the parameter space :math:`(a,b,c)` and save it.
 2. Calculate :math:`Z_i=f_i(X_0)` for all surrogate models :math:`f`.
@@ -416,7 +416,7 @@ MCMC IUQ Algorithm Explained to an adult
         11. Save :math:`X_{previous}`
 
 Forward UQ
-^^^^^^^^^^
+~~~~~~~~~~
 
 Once we have the set of point from running MCMC we can perform **Forward Uncertainty Quantification**.
 If we had another process that depended on :math:`a`, :math:`b`, and :math:`c`, we could use our sampled values to perform a prediction with uncertainty.
@@ -426,10 +426,10 @@ This will create a set of samples for our prediction.
 We can use these samples to estimate the uncertainty about the new predicted value.
 
 Tuning
-^^^^^^
+~~~~~~
 
 Convergence Metrics
-~~~~~~~~~~~~~~~~~~~
+```````````````````
 
 Our ultimate goal with tuning is to cause our chains to converge to the target distribution.
 We can estimate convergence by looking at the potential scale reduction statistic or Rhat, as well as our trace plots and autocorrelation plots.
@@ -447,7 +447,7 @@ Neff says that values with autocorrelations are less effective than fully indepe
 In general, we want to see Neff above 10,000.
 
 Proposal Sigma
-~~~~~~~~~~~~~~
+``````````````
 
 In order to get our chain to converge to the target distribution within a reasonable amount of time, we need to tune our chain.
 It is important to make sure that your chain is converging well before you move onto high volume sampling.
@@ -471,7 +471,7 @@ Even if only one value is poorly chosen it can still cause poor convergence for 
 Good convergence in one chain does not imply good convergence in the others.
 
 Every
-~~~~~
+`````
 
 Once we have adjusted the proposal sigmas of each variable the chains may still not show full convergence.
 In this case we can start to sample more points.
@@ -483,7 +483,7 @@ Increasing this parameter causes more iterations to be run, increasing our sampl
 
 
 Examples of Poor Convergence
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. note::
    There is a difference in the parametrization between the work Kevin has done and the example files provided.
@@ -497,7 +497,7 @@ Examples of Poor Convergence
    :alt: Slightly Under Converged
 
 Example of Good Convergence
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. figure:: _static/converged.png
    :alt: Converged
@@ -505,5 +505,5 @@ Example of Good Convergence
 MCMC API
 ---------------
 
-.. automodule:: uqp.uq_component.uqp_mcmc
+.. automodule:: uq_methods.uqp_mcmc
    :members: MCMC, DefaultMCMC, DiscrepancyMCMC

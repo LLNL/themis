@@ -22,5 +22,5 @@ a figure object and an axes object (or a list of objects).
 
 Plots API
 ---------
-.. automodule:: uqp.uq_component.plots
+.. automodule:: uq_methods.plots
    :members:

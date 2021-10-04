@@ -6,5 +6,5 @@ BBD=$1
 #HOST=$2
 UQPREPO=$BBD
 #/collab/usr/gapps/uq/UQPipeline/bin/runPipeline --run-unit-tests 2>&1 | tee $BBD/unittest.log
-$UQPREPO/test/run_tests.sh unit integration  2>&1 
+$UQPREPO/tests/run_tests.sh unit integration  2>&1
 #| tee $BBD/test.log

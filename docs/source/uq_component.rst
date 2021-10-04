@@ -1,7 +1,7 @@
+.. _uncertainty_quantification:
 
-
-UQ Component
-============
+Uncertainty Quantification
+==========================
 
 .. toctree::
    :maxdepth: 1

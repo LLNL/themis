@@ -1,5 +1,5 @@
 Filters
 =======
 
-.. automodule:: uqp.uq_component.uqp_filter
+.. automodule:: uq_methods.uqp_filter
    :members:

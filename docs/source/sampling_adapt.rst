@@ -1,6 +1,6 @@
 Adaptive Sampler
 ================
 
-.. automodule:: uqp.sampling.adaptive_sampler
+.. automodule:: sampling_methods.adaptive_sampler
    :members:
    :private-members:

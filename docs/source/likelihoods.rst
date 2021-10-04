@@ -1,5 +1,5 @@
 Likelihoods
 ===========
 
-.. automodule:: uqp.uq_component.likelihoods
+.. automodule:: uq_methods.likelihoods
    :members:
