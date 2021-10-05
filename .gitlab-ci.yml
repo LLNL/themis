@@ -45,7 +45,7 @@ black_on-commit:
   rules:
   - if: '$CI_PIPELINE_SOURCE == "schedule"'
     when: never
-  - if: '$CI_COMMIT_BRANCH == "master"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
   allow_failure: true
   tags:
     - shell
@@ -89,7 +89,7 @@ black_monthly:
 quartz_test:
   stage: test
   rules:
-  - if: '$CI_COMMIT_BRANCH == "master"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
   - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   tags:
     - quartz
@@ -113,7 +113,7 @@ quartz_test:
 borax_test:
   stage: test
   rules:
-  - if: '$CI_COMMIT_BRANCH == "master"'
+  - if: '$CI_COMMIT_BRANCH == "main"'
   - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   tags:
     - borax2
