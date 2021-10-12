@@ -433,6 +433,20 @@ def _pce_score(feature_data, response_data, ranges, powers, pce_degree=1, model_
 
 
 def one_at_a_time_effects(feature_data, response_data):
+    """
+        Calculates the elementary effects for a one-at-a-time study.
+
+        The `feature_data` points should have been generated from sampling_methods.sampler.OneAtATimeSampler
+        with `do_oat=True` or similar.
+        Two elementary effects are calculated per feature resulting in 2*p total effects
+
+        Args:
+            - feature_data ([[float]]): Array-like of feature data. Each column is a feature; each row is an observation
+            - response_data ([[float]]): Array-like of response data. Rows correspond to rows in feature data
+
+        Returns:
+            - Elementary Effects ([[float]]): (p by 2) Numpy Array of elementary effects
+    """
     m, n = feature_data.shape
     assert m == 2*n+1
 
@@ -447,6 +461,22 @@ def one_at_a_time_effects(feature_data, response_data):
 
 
 def morris_effects(feature_data, response_data):
+    """
+        Calculates the elementary effects for a Morris one-at-a-time study.
+
+        The `feature_data` points should have been generated from sampling_methods.sampler.MorrisOneAtATimeSampler
+        or similar.
+        The number of elementary effects calculated depends on the number of paths in the study.
+        Each path produces one elementary effect per dimension.
+        So for r paths, p*r total effects will be calculated.
+
+        Args:
+            - feature_data ([[float]]): Array-like of feature data. Each column is a feature; each row is an observation
+            - response_data ([[float]]): Array-like of response data. Rows correspond to rows in feature data
+
+        Returns:
+            - Elementary Effects ([[float]]): (p by r) Numpy Array of elementary effects
+        """
     n, k = feature_data.shape
     r = int(n / (k + 1))
 
@@ -464,6 +494,12 @@ def morris_effects(feature_data, response_data):
 def lasso_path_plot(ax, feature_data, response_data, feature_names, response_names, degree=1, method='lasso'):
     """
         Plots Lasso paths
+
+        Plots the path of linear regression coefficients for different amounts of l1 regularization.
+        The x-axis is the shrinkage ratio which varies between 0 and 1.
+        The shrinkage ratio is a ratio between the L1 norm of the regularized coefficients and the L1 norm of the
+        un-regularized coefficients.
+        Features that go to zero sooner tend to contribute less to the sensitivity of the response.
 
         Args:
             - ax ([matplotlib.Axes]): Array-like of Axes to plot to
@@ -503,6 +539,10 @@ def sensitivity_plot(ax, surrogate_model, feature_names, response_names, feature
                      num_plot_points=100, num_seed_points=5, seed=2018):
     """
         Plots sensitivity plots
+
+        Also called spaghetti plot.
+        Plots a set of 1-d slices of the response surface.
+        Colors across plots correspond to the same seed point.
 
         Args:
             - ax ([[matplotlib.Axes]]): Array-like of Axes to plot to
