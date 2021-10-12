@@ -1033,6 +1033,11 @@ class TestSampler(unittest.TestCase):
         np.testing.assert_array_almost_equal(np_actual_values_lognormal1, np_expected_values_lognormal)
         np.testing.assert_array_almost_equal(np_actual_values_lognormal2, np_expected_values_lognormal)
 
+    # Skip for Python 2
+    # For some reason, scipy's distributions are raising a Value Error instead
+    #  of a TypeError when 'scale' is the wrong type.
+    # This is fixed in Python 3
+    @unittest.skipIf(sys.version_info[0] < 3, "Not supported for Python 2")
     def test_ProbabilityDensityFunctionSampler_invalid(self):
         # no parameters given
         self.assertRaises(TypeError, sampling_methods.sampler.ProbabilityDensityFunctionSampler.sample_points)
