@@ -179,6 +179,24 @@ will have a Students-t distribution with :math:`n-p` degrees of freedom.
 If :math:`t_j` is far from zero it means that we would reject the null hypothesis that :math:`\beta_j=0`.
 This hypothesis test is a way to quantify what it means for :math:`\hat{\beta}` to be near to or far from zero.
 
+F-Scores
+````````
+
+We can use an :math:`F`-test to compare subsets of our model.
+Consider a linear model where we exclude one of the features by setting :math:`\hat{\beta}_i=0`.
+Call this new model the reduced model and our original model the unreduced model.
+The then our residuals from the reduced model are :math:`\hat{\xi}_R` and our residuals from the unreduced model are :math:`\hat{\xi}_{UR}`.
+If we assume that the true value for :math:`\hat{\beta}_i` is 0, then the quantity
+
+.. math::
+   F=\frac{\sum\hat{\xi}_R^2-\sum\hat{\xi}_{UR}^2}{\left(\frac{\sum\hat{\xi}_{UR}^2}{n-1}\right)}
+
+will have an :math:`F` distribution with :math:`1` and :math:`n-1` degrees of freedom.
+High values of :math:`F` imply that the coefficient we removed must be significant.
+
+If we use these :math:`F`-scores as technique for sensitivity analysis, it is important to only remove one feature at a time,
+as removing a feature will almost always change the relative significance of the other features.
+
 Regularization
 ``````````````
 Regularization is based around adding regularization terms to the squared error minimization.
@@ -191,11 +209,25 @@ In Ridge Regression, :math:`R` is the :math:`\ell^2` norm while in LASSO Regress
 
 `LASSO <https://en.wikipedia.org/wiki/Lasso_(statistics)>`_ regression is of particular interest in sensitivity analysis due to its ability to perform feature selection.
 LASSO regression takes advantage of the sharpness of the :math:`\ell^1` norm to force small values of :math:`\hat{\beta}` to zero.
+
 Looking at how :math:`\hat{\beta}` changes as :math:`\lambda` varies between 0 and :math:`\infty` is called the "LASSO path".
 In practice, LASSO paths actually look at shrinkage vs :math:`\hat{\beta}`.
 Shrinkage is a ratio of the :math:`\ell^1` norm of :math:`\hat{\beta}` for a particular value of :math:`\lambda` over the unregularized :math:`\hat{\beta}`.
+
+.. math::
+   \frac{||\hat{\beta}_{\lambda}||_1}{||\hat{\beta}||_1}
+
 Shrinkage varies between 0, where :math:`\lambda\to\infty` and :math:`\hat{\beta}` is fully regularized to all be 0, and 1, where :math:`\lambda=0` and the regularization term vanishes.
 
+.. math::
+   f(x_1,x_2)=2x_1-3x_2^2
+
+.. figure:: ../_static/poly_lasso.png
+
+.. math::
+   f(x,a,b,c)=\frac{ax^c}{x^c+b^c}
+
+.. figure:: ../_static/hill_lasso.png
 
 Polynomial Chaos Expansion (PCE)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
