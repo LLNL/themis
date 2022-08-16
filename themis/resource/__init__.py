@@ -43,13 +43,11 @@ def valid_resource_mgr(identifier):
     return identifier in _RESOURCE_MANAGERS
 
 
-def _resource_mgr_from_env(consider_flux=True):
+def _resource_mgr_from_env():
     """Attempt to identify the resource manager from the environment.
 
     Return the empty string if no match is found
     """
-    if os.getenv("FLUX_URI") is not None and consider_flux:
-        return Flux.identifier
     sys_type = os.getenv("SYS_TYPE", "")
     if sys_type == "" and platform.system().lower() in ["darwin", "windows"]:
         return NoResourceManager.identifier
@@ -59,12 +57,18 @@ def _resource_mgr_from_env(consider_flux=True):
         return Slurm.identifier
     if sys_type.startswith("blueos") or (utils.which("bsub") and utils.which("jsrun")):
         return Lsf.identifier
+    # check Flux last because it can run inside the others
+    if (
+        os.getenv("FLUX_URI") is not None
+        or subprocess.Popen(["flux", "resource", "list"]).wait() == 0
+    ):
+        return Flux.identifier
     return _UNIDENTIFIED_RMGR
 
 
-def default_resource_manager_id(consider_flux=True):
+def default_resource_manager_id():
     """Return the current type of system. Return values are one of None,
-    'toss', 'blueos', and 'suse-linux'.
+    'toss', 'blueos', 'flux' and 'suse-linux'.
 
     Note that None is actually an identifier for a resource manager,
     the NoResourceManager.
@@ -72,7 +76,7 @@ def default_resource_manager_id(consider_flux=True):
     Raises NotImplementedError if system is not recognized.
     """
 
-    rsrc_mgr = _resource_mgr_from_env(consider_flux)
+    rsrc_mgr = _resource_mgr_from_env()
     if rsrc_mgr == _UNIDENTIFIED_RMGR:
         not_supported_msg = (
             "Your machine {!r} is not recognized, and may not be supported."
@@ -81,15 +85,13 @@ def default_resource_manager_id(consider_flux=True):
     return rsrc_mgr
 
 
-def identify_resource_manager(
-    identifier=_UNIDENTIFIED_RMGR, consider_flux=True, path=None
-):
+def identify_resource_manager(identifier=_UNIDENTIFIED_RMGR, path=None):
     """Return the resource manager denoted by the given identifier.
 
     If identifier is None, get the default resource manager for this machine.
     """
     if identifier == _UNIDENTIFIED_RMGR:
-        identifier = default_resource_manager_id(consider_flux)
+        identifier = default_resource_manager_id()
     elif isinstance(identifier, str):
         identifier = identifier.lower()
     try:
@@ -344,20 +346,26 @@ class Flux(ResourceManager):
 
     def __init__(self, path):
         super(Flux, self).__init__(None)
-        if os.getenv("FLUX_URI") is None:
-            self.underlying_resource_mgr = identify_resource_manager(
-                consider_flux=False
-            )
+        # check whether this is a Flux-native machine or if another RM is running
+        if default_resource_manager_id() == self.identifier:
+            self.underlying_resource_mgr = None  # flux-native
         else:
-            self.underlying_resource_mgr = None
+            #  another RM is running
+            self.underlying_resource_mgr = identify_resource_manager()
         self.path = path
+
+    def __repr__(self):
+        """Return str representation of constructor call"""
+        return "{}(path={}, underlying_resource_mgr={})".format(
+            type(self).__name__, self.path, self.underlying_resource_mgr
+        )
 
     @property
     def allocator(self):
         """Return the allocator of the underlying rmgr."""
         if self.underlying_resource_mgr is not None:
             return self.underlying_resource_mgr.allocator
-        raise NotImplementedError()
+        return allocators.FluxAllocator
 
     def commands_to_launch_backend(  # pylint: disable=too-many-arguments
         self,
