@@ -418,3 +418,52 @@ class InteractiveAllocator(BatchScriptAllocator):
             return True
         else:
             return False
+
+
+class FluxAllocator(Allocator):
+    def __init__(self, job_id=None):
+        self.job_id = None
+
+    def start(self, allocation, applications, script_dir=None, working_dir=None):
+        args = [
+            "flux",
+            "mini",
+            "batch",
+            "--wrap",
+            "--exclusive",
+            "-N",
+            str(allocation.nodes),
+        ]
+        if allocation.name is not None:
+            args.append("--job-name=" + str(allocation.name))
+        if allocation.timeout is not None:
+            args += ["-t", str(allocation.timeout) + "m"]
+        separated_applications
+        for app in applications:
+            separated_applications.append(app + ";")
+        proc = sp.Popen(
+            args + applications + ["wait"],
+            stdout=sp.PIPE,
+            stderr=sp.STDOUT,
+            universal_newlines=True,
+            cwd=working_dir,
+        )
+        stdout, _ = proc.communicate()
+        if proc.returncode != 0:
+            raise Exception(
+                "Couldn't launch Flux job, flux mini batch exited with "
+                "returncode {}:\n{}".format(subproc.returncode, stdout)
+            )
+        return stdout
+
+    def wait(self, sleep_interval=10):
+        """Wait for the ensemble to complete. For use by testing infrastructure."""
+        proc = sp.Popen(
+            ["flux", "job", "attach", str(self.job_id)],
+            stdout=sp.DEVNULL,
+            stderr=sp.PIPE,
+            universal_newlines=True,
+        )
+        _, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(stderr)
