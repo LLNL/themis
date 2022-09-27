@@ -53,8 +53,6 @@ class ShellScript(object):
         """
         with open(self.path, "w") as file_handle:
             file_handle.write("#!" + utils.which(self.shell) + "\n")
-            if self.shell == "bash":
-                file_handle.write("set -e\n")
             for header in self.headers:
                 file_handle.write(header + "\n")
             file_handle.write("\n")
