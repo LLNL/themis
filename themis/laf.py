@@ -18,7 +18,6 @@ from themis import utils
 from themis import resource
 from themis.backend.worker.prepper import populate_run_dir
 
-
 class BatchSubmitter(object):  # pylint: disable=too-many-instance-attributes
     """Instances of this class are used to create and launch ensembles.
 
@@ -212,11 +211,13 @@ def setup_parser():
 def main():
     """Run the command-line interface to the ``BatchSubmitter``."""
     args = setup_parser()
+
+    print(args)
     samples = utils.read_csv(args.parameterfile)
     mgr = BatchSubmitter(
-        args.script,
+        args.batchscript,
         samples,
-        args.resource_mgr,
+        args.resourcemgr,
         args.run_parse,
         args.run_copy,
         args.run_symlink,
