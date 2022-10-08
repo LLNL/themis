@@ -3,8 +3,8 @@
 
 before_script:
   - echo "Before script section"
-  - python2 -V  # Print out python version for debugging
-  - python3 -V  # Print out python version for debugging
+  - python2 -V # Print out python version for debugging
+  - python3 -V # Print out python version for debugging
   - echo $NIGHTLY
   - echo $WEEKLY
   - echo $MONTHLY
@@ -57,7 +57,7 @@ black_on-commit:
     - echo $pythonfiles
     - email=$(git show -s --format='%ae' $CI_COMMIT_SHA)
     - echo $email
-    - source /usr/WS1/healy22/static_analysis_env/bin/activate
+    - source /usr/WS1/vandv/gitlab/static_analysis_env/bin/activate
     - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results for Commit $CI_COMMIT_SHA" | mail -a black_diff.txt -a black_report.txt -s "UQP On-Commit Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
     - deactivate
   artifacts:
@@ -78,7 +78,7 @@ black_monthly:
     - echo $pythonfiles
     - email="healy22@llnl.gov domyancic1@llnl.gov"
     - echo $email
-    - source /usr/WS1/healy22/static_analysis_env/bin/activate
+    - source /usr/WS1/vandv/gitlab/static_analysis_env/bin/activate
     - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results" | mail -a black_diff.txt -a black_report.txt -s "Monthly UQP Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
     - deactivate
   artifacts:
