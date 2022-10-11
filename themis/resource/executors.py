@@ -9,6 +9,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import glob
 import os
 import subprocess
 
@@ -30,8 +31,9 @@ else:
     FLUX_BINDINGS_AVAIL = True
 
 
-_STDOUT_ERR_FILE = "run.log"
-
+RUN_LOG_FILE = 'run' + os.extsep + 'log'
+LOG_EXT = os.extsep + 'log'
+RUNLOG_GLBR = 'run' + '*' + LOG_EXT
 
 def _exitstatus_to_returncode(status):
     """Convert an `os.wait` exit status to a returncode."""
@@ -89,7 +91,7 @@ class ProcessExecutor(Executor):
         self._environ = dict(os.environ)
         self._environ[URI_ENV_VAR] = self.themis_uri
         self._environ[SETUPDIR_ENV_VAR] = self.setup_dir
-        self._environ[EXECDIR_ENV_VAR] = self.exec_dir
+
 
     # pylint: disable=too-many-arguments
     def submit(self, run_id, step):
@@ -98,7 +100,18 @@ class ProcessExecutor(Executor):
         command.extend(step.args)
         env = dict(self._environ)
         env[RUNID_ENV_VAR] = str(run_id)
-        with open(os.path.join(step.cwd, _STDOUT_ERR_FILE), "a") as run_log:
+
+        print("source/executors.py submit")
+        print(step)
+        print(step.cwd)
+        cwd = step.cwd[:-1]
+
+        if os.path.isfile(os.path.join(cwd, RUN_LOG_FILE)):
+            count = len(glob.glob(os.path.join(cwd, RUNLOG_GLBR)))
+            os.rename(os.path.join(cwd,  RUN_LOG_FILE),
+                     "%s_%04d%s" % (os.path.join(cwd,  'run'), count, LOG_EXT))
+
+        with open(os.path.join(step.cwd, RUN_LOG_FILE), "a") as run_log:
             process = subprocess.Popen(
                 command,
                 cwd=step.cwd,
@@ -174,7 +187,17 @@ class FluxBindingsExecutor(Executor):
             jobspec.cwd = step.cwd
         if step.timeout is not None and step.timeout > 0:
             jobspec.duration = float(step.timeout * 60)
-        jobspec.stdout = os.path.join(step.cwd, _STDOUT_ERR_FILE)
+
+        print("source/executors.py FLUX submit")
+        print(step)
+        print(step.cwd)
+
+        if os.path.isfile(os.path.join(cwd, RUN_LOG_FILE)):
+            count = len(glob.glob(os.path.join(cwd, RUNLOG_GLBR)))
+            os.rename(os.path.join(cwd,  RUN_LOG_FILE),
+                     "%s_%04d%s" % (os.path.join(cwd,  'run'), count, LOG_EXT))
+
+        jobspec.stdout = os.path.join(step.cwd, RUN_LOG_FILE)
         self._futures[self._executor.submit(jobspec)] = self._next_jobid
         self._next_jobid += 1
         return self._next_jobid - 1
