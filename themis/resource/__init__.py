@@ -294,6 +294,21 @@ class Moab(ResourceManager):
 
 
 @_register_rmgr
+class Sbatch(ResourceManager):
+    """The Sbatch resource manager.
+
+    Only partially implemented because only used by the ``laf.BatchSubmitter`` class.
+    """
+
+    identifier = "sbatch"
+    allocator = allocators.SbatchAllocator
+
+    @classmethod
+    def build_cmd(cls, step):
+        raise NotImplementedError("SBATCH only partially implemented")
+
+
+@_register_rmgr
 class Slurm(ResourceManager):
     """The Slurm resource manager, as it works on LC."""
 

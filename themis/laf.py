@@ -115,14 +115,14 @@ class BatchSubmitter(object):  # pylint: disable=too-many-instance-attributes
             parsed_batch_script = os.path.join(
                 run_dir, os.path.basename(self._batch_script)
             )
-            self._allocator.launch_batch_script(parsed_batch_script, run_dir)
+            jobid = self._allocator.launch_batch_script(parsed_batch_script, run_dir)
             if verbosity > 0:
                 print(
                     "Submitted batch script, job ID is {}".format(
                         self._allocator.job_id
                     )
                 )
-            job_ids.append(self._allocator.job_id)
+            job_ids.append(jobid)
         return job_ids
 
     def dry_run(self, *run_ids, **kwargs):
@@ -178,7 +178,7 @@ def setup_parser():
     parser.add_argument(
         "resourcemgr",
         type=lambda x: str(x).lower(),
-        choices=["slurm", "moab", "lsf", "none"],
+        choices=["slurm", "moab", "lsf", "sbatch", "none"],
         help="Resource manager to submit the script to",
     )
     utils.add_common_creation_args(parser)

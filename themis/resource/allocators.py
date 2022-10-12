@@ -249,7 +249,7 @@ class SbatchAllocator(BatchScriptAllocator):
 
     @staticmethod
     def launch_batch_script(script_path, working_dir):
-        """Submit a Slurm batch script; return the jobid."""
+        """Submit a Sbatch batch script; return the jobid."""
         subproc = sp.Popen(
             ["sbatch", script_path],
             stdout=sp.PIPE,
