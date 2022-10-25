@@ -188,10 +188,7 @@ class FluxBindingsExecutor(Executor):
         if step.timeout is not None and step.timeout > 0:
             jobspec.duration = float(step.timeout * 60)
 
-        print("source/executors.py FLUX submit")
-        print(step)
-        print(step.cwd)
-
+        cwd = step.cwd
         if os.path.isfile(os.path.join(cwd, RUN_LOG_FILE)):
             count = len(glob.glob(os.path.join(cwd, RUNLOG_GLBR)))
             os.rename(os.path.join(cwd,  RUN_LOG_FILE),
