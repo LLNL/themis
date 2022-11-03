@@ -1,3 +1,4 @@
---find-links /usr/gapps/python/wheelhouse
-
--e .
+-numpy
+-scikit-learn
+-scipy
+-matplotlib

@@ -1,5 +1,4 @@
 import os
-
 import setuptools
 
 
@@ -17,20 +16,20 @@ def read_long_description():
 
 if __name__ == "__main__":
     setuptools.setup(
-        name="uqpipeline",
-        version="0.0.1.dev1",
-        author="LLNL UQP Team",
-        author_email="uqpipeline-devs@llnl.gov",
-        description="LLNL's UQ Pipeline",
-        url="https://lc.llnl.gov/bitbucket/projects/UQP/repos/uqp/",
+        name="themis",
+        version="1.0.0",
+        author="David Domyancic",
+        author_email="domyancic1@llnl.gov",
+        description="LLNL's Ensemble Manager",
+        url="https://lc.llnl.gov/gitlab/weave/themis",
         long_description=read_long_description(),
         long_description_content_type="text/markdown",
         packages=setuptools.find_packages(
             where=_SCRIPT_DIR,
-            include=["uqp" + ".*" * i for i in range(0, 5)] + ["themis" + ".*" * i for i in range(0, 5)]
+            include=["themis" + ".*" * i for i in range(0, 5)]
         ),
         install_requires=[
-            "numpy>=1.15",
+            "numpy",
             "scikit-learn",
             "scipy",
             "matplotlib",

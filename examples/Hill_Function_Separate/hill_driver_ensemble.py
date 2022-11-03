@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import hill_data
 import themis
-from sampling_methods import composite_samples, sampler
+from trata import composite_samples, sampler
 
 for i, (X_ob, Y_ob) in enumerate(zip(hill_data.X_obs, hill_data.Y_obs)):
     print(i)

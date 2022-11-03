@@ -1,44 +1,15 @@
-# This file is a template, and might need editing before it works on your project.
-# see https://docs.gitlab.com/ce/ci/yaml/README.html for all available options
-
+# You can override the included template(s) by including variable overrides
+# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
+# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
+# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
+# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
+# Note that environment variables can be set in several places
+# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 before_script:
-  - echo "Before script section"
-  - python2 -V # Print out python version for debugging
-  - python3 -V # Print out python version for debugging
-  - echo $NIGHTLY
-  - echo $WEEKLY
-  - echo $MONTHLY
-  - echo $CI_PROJECT_DIR
-  - echo $CI_COMMIT_BEFORE_SHA
-  - echo $CI_COMMIT_DESCRIPTION
-  - echo $CI_COMMIT_MESSAGE
-  - echo $CI_COMMIT_REF_NAME
-  - echo $CI_COMMIT_REF_PROTECTED
-  - echo $CI_COMMIT_REF_SLUG
-  - echo $CI_COMMIT_SHA
-  - echo $CI_COMMIT_SHORT_SHA
-  - echo $CI_COMMIT_TITLE
-  - echo $CI_COMMIT_TAG
-  - echo $CI_COMMIT_BRANCH
-  - echo $CI_PIPELINE_ID
-  - echo $CI_PIPELINE_IID
-  - echo $CI_PIPELINE_SOURCE
-  - echo $GITLAB_USER_ID
-  - echo $GITLAB_USER_LOGIN
-  - echo $GITLAB_USER_NAME
-  - echo $CI_PIPELINE_CREATED_AT
-  - export DATETIME=$(date "+%Y-%m-%dT%H:%M:%S")
-  - echo $DATETIME
-  - echo $LC_ZONE
-  - echo "whoami"
-  - whoami
-
-after_script:
-  - echo "End Test Run"
-   
-stages: 
-  - static analysis
-  - test
+- env
+stages:
+- static analysis
+- test
 
 black_on-commit:
   stage: static analysis
@@ -86,51 +57,51 @@ black_monthly:
     paths:
       - black_report.txt
 
-quartz_test:
-  stage: test
+
+".run_test":
   rules:
-  - if: '$CI_COMMIT_BRANCH == "main"'
-  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  tags:
-    - quartz
-    - shell
-  script: 
-    - Xvfb :78 &
-    - JOBID=$!
-    - export DISPLAY=:78
-    - echo "Run Unit Tests"
-    - echo "./.gitlab/rununittests.sc"
-    - ./.gitlab/rununittests.sc .
-#   Kill Xvfb process
-    - kill -15 $JOBID || true
-#   Parse results
-    - echo "./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components"
-    - python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components
+  - if: $CI_COMMIT_BRANCH == "main"
+  - if: $CI_COMMIT_BRANCH == "branch"
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+  - if [[ $HOSTNAME =~ "borax" ]]; then
+      ./tests/run_tests.sh unit integration -- -vvf 2>&1
+      python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components;
+    elif [[ $HOSTNAME =~ "quartz" ]]; then 
+      ./tests/run_tests.sh unit integration -- -vvf 2>&1 
+      python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components;
+    fi || true
   artifacts:
     reports:
-      junit: quartz_results.xml
+      junit: "*_results.xml"
 
-borax_test:
-  stage: test
-  rules:
-  - if: '$CI_COMMIT_BRANCH == "main"'
-  - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+".on_borax":
   tags:
-    - borax2
-    - shell
-  script: 
-    - Xvfb :79 &
-    - JOBID=$!
-    - export DISPLAY=:79
-    - echo "Run Unit Tests"
-    - echo "./.gitlab/rununittests.sc"
-    - ./.gitlab/rununittests.sc .
-#   Kill Xvfb process
-    - kill -15 $JOBID || true
-#   Parse results
-    - echo "python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components"
-    - python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components
-  artifacts:
-    reports:
-      junit: borax_results.xml
+  - borax
+  - shell
 
+".on_quartz":
+  tags:
+  - quartz
+  - shell
+
+test_borax:
+  image: python:3.6
+  stage: test
+  coverage: "/(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$/"
+  extends:
+  - ".run_test"
+  - ".on_borax"
+test_quartz:
+  image: python:3.6
+  stage: test
+  coverage: "/(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$/"
+  extends:
+  - ".run_test"
+  - ".on_quartz"
+  
+sast:
+  stage: test
+include:
+- template: Security/SAST.gitlab-ci.yml
+- template: Security/Dependency-Scanning.gitlab-ci.yml

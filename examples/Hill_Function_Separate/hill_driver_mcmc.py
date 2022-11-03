@@ -7,9 +7,9 @@ import pickle
 import matplotlib.pyplot as plt
 
 import hill_data
-from uq_methods import uqp_mcmc
+from ibis import mcmc
 
-mcmc_ana = uqp_mcmc.DefaultMCMC()
+mcmc_ana = mcmc.DefaultMCMC()
 
 mcmc_ana.add_input('a', 2, 10, 2.0)
 mcmc_ana.add_input('b', 0, 3, 0.5)
