@@ -9,8 +9,8 @@ import numpy as np
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 import themis
-from sampling_methods import composite_samples, sampler
-from uq_methods import uqp_mcmc, plots
+from trata import composite_samples, sampler
+from ibis import mcmc, plots
 
 MODEL_TYPE = 'gpr'
 N = 150
@@ -59,7 +59,7 @@ else:
 # SETUP AND RUN ENSEMBLES #
 ###########################
 
-mcmc_ana = uqp_mcmc.DefaultMCMC()
+mcmc_ana = mcmc.DefaultMCMC()
 
 for i, (X_ob, Y_ob) in enumerate(zip(X_obs, Y_obs)):
     Samples = composite_samples.Samples()

@@ -56,7 +56,7 @@ can be launched like so:
 .. code:: python
 
   from themis import laf
-  from uqp.sampling.composite_samples import parse_file
+  from trata.composite_samples import parse_file
 
   # assume the samples are defined in a csv file stored at "samples/my_samples.csv"
   samples = parse_file("samples/my_samples.csv", "csv")
@@ -142,7 +142,7 @@ And lastly, the driver script for the ``BatchSubmitter``, stored at ``./driver.p
 .. code:: python
 
   from themis import laf
-  from uqp.sampling.composite_samples import parse_file
+  from trata.composite_samples import parse_file
 
   samples = parse_file("my_samples.csv", "csv")
   sub = laf.BatchSubmitter("script.sh", samples, "lsf")

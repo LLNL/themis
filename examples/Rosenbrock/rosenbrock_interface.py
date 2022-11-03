@@ -4,7 +4,7 @@ from __future__ import print_function
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 
-from sampling_methods import composite_samples, adaptive_sampler
+from trata import composite_samples, adaptive_sampler
 from themis import Run, user_utils
 
 NUM_TOTAL = 5

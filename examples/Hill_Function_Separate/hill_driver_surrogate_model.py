@@ -7,7 +7,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 
 import hill_data
-from sampling_methods import composite_samples
+from trata import composite_samples
 
 DO_PLOTS = True
 

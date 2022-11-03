@@ -5,7 +5,7 @@ from __future__ import print_function
 import os
 
 import themis
-from sampling_methods import composite_samples, sampler
+from trata import composite_samples, sampler
 
 N = 3
 

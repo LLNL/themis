@@ -279,7 +279,7 @@ that calls on Themis, and then execute that script. Let's name the script ``mpi_
 
     import themis
     # import a function to convert the CSV into a list of dictionaries
-    from uqp.sampling.composite_samples import parse_file
+    from ibis.composite_samples import parse_file
 
 
     def main():
