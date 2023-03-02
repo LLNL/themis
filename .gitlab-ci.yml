@@ -1,107 +1,136 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/#customizing-settings
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
-before_script:
-- env
+variables:
+  ALLOC_NAME: ${CI_PROJECT_NAME}_${CI_PIPELINE_ID}
+  ALLOC_ARGS: "--partition=pdebug --account=wbronze --no-shell --cpus-per-task=1 --no-shell --job-name=${ALLOC_NAME}"
+
 stages:
-- static analysis
-- test
+  - allocate_resources
+  - create_env
+  - install
+  - run_unit_tests
+  - run_integration_tests
+  - release_resources
+  - check_test_results
+        
+.create_env:
+  script:
+    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - srun --jobid=${JOBID} --time=1 --nodes=1 make create_env
+    
+.install:
+  script:
+    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - srun --jobid=${JOBID} --time=1 --nodes=1 make install
 
-black_on-commit:
-  stage: static analysis
-  rules:
-  - if: '$CI_PIPELINE_SOURCE == "schedule"'
-    when: never
-  - if: '$CI_COMMIT_BRANCH == "main"'
-  allow_failure: true
+.run_unit_tests:
+  script:
+    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - srun --jobid=${JOBID} --time=2 --nodes=1 make run_unit_tests  
+
+.run_integration_tests:
+  script:
+    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - srun --jobid=${JOBID} --time=26 --nodes=1 make run_integration_tests
+    
+.on_cz:
   tags:
     - shell
-    - borax
-  script:
-    - files=$(git diff-tree --no-commit-id --name-only -r $CI_COMMIT_SHA)
-    - if [ ! -z "${files}" ]; then pythonfiles=$(find $files -type f \( -name "*.py" -print -o -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} + \)); fi
-    - echo $files
-    - echo $pythonfiles
-    - email=$(git show -s --format='%ae' $CI_COMMIT_SHA)
-    - echo $email
-    - source /usr/WS1/vandv/gitlab/static_analysis_env/bin/activate
-    - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results for Commit $CI_COMMIT_SHA" | mail -a black_diff.txt -a black_report.txt -s "UQP On-Commit Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
-    - deactivate
-  artifacts:
-    when: always
-    paths:
-      - black_report.txt
-
-black_monthly:
-  stage: static analysis
-  rules:
-  - if: '$MONTHLY == "TRUE"'
-  allow_failure: true
+    - ruby
+    
+.on_rz:
   tags:
     - shell
-    - borax
-  script:
-    - pythonfiles=$(find core -type f \( -name "*.py" -print -o -exec awk ' /^#!.*python/{print FILENAME} {nextfile}' {} + \))
-    - echo $pythonfiles
-    - email="healy22@llnl.gov domyancic1@llnl.gov"
-    - echo $email
-    - source /usr/WS1/vandv/gitlab/static_analysis_env/bin/activate
-    - if [ ! -z "${pythonfiles}" ]; then black --diff $pythonfiles 1> black_diff.txt 2> black_report.txt || true && echo "Black Results" | mail -a black_diff.txt -a black_report.txt -s "Monthly UQP Black Report" $email; else echo "No python files for Black analysis" > black_report.txt; fi
-    - deactivate
-  artifacts:
-    when: always
-    paths:
-      - black_report.txt
+    - rztopaz
 
-
-".run_test":
+.run_on_cz:
   rules:
-  - if: $CI_COMMIT_BRANCH == "main"
-  - if: $CI_COMMIT_BRANCH == "branch"
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: '$SOURCE_ZONE == "CZ" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+
+.run_on_rz:
+  rules:
+    - if: '$SOURCE_ZONE == "RZ" && $CI_PIPELINE_SOURCE != "merge_request_event"'
+
+.check_test_results:
   script:
-  - if [[ $HOSTNAME =~ "borax" ]]; then
-      ./tests/run_tests.sh unit integration -- -vvf 2>&1
-      python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json borax_results.xml Components;
-    elif [[ $HOSTNAME =~ "quartz" ]]; then 
-      ./tests/run_tests.sh unit integration -- -vvf 2>&1 
-      python3 ./.gitlab/generateJenkinsXmlFromJson.py combined_results.json quartz_results.xml Components;
-    fi || true
-  artifacts:
-    reports:
-      junit: "*_results.xml"
+    - make check_test_results
+    
+allocate_resources_on_cz:
+  extends: [ .on_cz, .run_on_cz ] 
+  variables:
+    GIT_STRATEGY: none
+  stage: allocate_resources
+  script:
+    - salloc --time=30 --nodes=1 ${ALLOC_ARGS}
+        
+create_env_on_cz:
+  stage: create_env
+  extends: [ .on_cz, .run_on_cz, .create_env ]
 
-".on_borax":
-  tags:
-  - borax
-  - shell
-
-".on_quartz":
-  tags:
-  - quartz
-  - shell
-
-test_borax:
-  image: python:3.6
-  stage: test
-  coverage: "/(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$/"
-  extends:
-  - ".run_test"
-  - ".on_borax"
-test_quartz:
-  image: python:3.6
-  stage: test
-  coverage: "/(?i)total.*? (100(?:\\.0+)?\\%|[1-9]?\\d(?:\\.\\d+)?\\%)$/"
-  extends:
-  - ".run_test"
-  - ".on_quartz"
+install_on_cz:
+  stage: install
+  extends: [ .on_cz, .run_on_cz, .install ]
   
-sast:
-  stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
-- template: Security/Dependency-Scanning.gitlab-ci.yml
+run_unit_tests_on_cz:
+  stage: run_unit_tests
+  extends: [ .on_cz, .run_on_cz, .run_unit_tests ]
+  allow_failure: true
+    
+run_integration_tests_on_cz:
+  stage: run_integration_tests
+  extends: [ .on_cz, .run_on_cz, .run_integration_tests ]
+  allow_failure: true
+    
+release_resources_on_cz:
+  variables:
+    GIT_STRATEGY: none
+  extends: [ .on_cz, .run_on_cz ]
+  stage: release_resources
+  script:
+    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - ([[ -n "${JOBID}" ]] && scancel ${JOBID})
+  # Releasing the allocation must be done even of pipeline failure.
+  when: always
+
+check_test_results_on_cz:
+  stage: check_test_results
+  extends: [ .on_cz, .run_on_cz, .check_test_results ]
+    
+allocate_resources_on_rz:
+  extends: [ .on_rz, .run_on_rz ] 
+  variables:
+    GIT_STRATEGY: none
+  stage: allocate_resources
+  script:
+    - salloc --time=30 --nodes=1 ${ALLOC_ARGS}
+        
+create_env_on_rz:
+  stage: create_env
+  extends: [ .on_rz, .run_on_rz, .create_env ]
+
+install_on_rz:
+  stage: install
+  extends: [ .on_rz, .run_on_rz, .install ]
+  
+run_unit_tests_on_rz:
+  stage: run_unit_tests
+  extends: [ .on_rz, .run_on_rz, .run_unit_tests ]
+  allow_failure: true
+    
+run_integration_tests_on_rz:
+  stage: run_integration_tests
+  extends: [ .on_rz, .run_on_rz, .run_integration_tests ]
+  allow_failure: true
+
+release_resources_on_rz:
+  variables:
+    GIT_STRATEGY: none
+  extends: [ .on_rz, .run_on_rz ]
+  stage: release_resources
+  script:
+    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
+    - ([[ -n "${JOBID}" ]] && scancel ${JOBID})
+  # Releasing the allocation must be done even of pipeline failure.
+  when: always
+
+check_test_results_on_rz:
+  stage: check_test_results
+  extends: [ .on_rz, .run_on_rz, .check_test_results ]
