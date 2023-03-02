@@ -38,12 +38,31 @@ install:
 .PHONY: run_unit_tests
 run_unit_tests:
 	@echo "Run Themis unit tests..."
-	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && \
-	cd tests/unit && pytest -vv test_*.py | tee $(REPORTS_DIR)/themis_unit_tests.txt 
+	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/unit && \
+	if [ "$(UNIT_TESTS)" ]; then \
+		for t in $(UNIT_TESTS); do \
+			pytest -vv $$t.py | tee $(REPORTS_DIR)/themis_unit_tests.txt; \
+		done; \
+	else \
+		pytest -vv test_*.py | tee $(REPORTS_DIR)/themis_unit_tests.txt; \
+	fi
 
 
 .PHONY: run_integration_tests
 run_integration_tests:
+	@echo "Run Themis integration tests..."
+	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/integration && \
+	if [ "$(INTEGRATION_TESTS)" ]; then \
+		for t in $(INTEGRATION_TESTS); do \
+			pytest -vv $$t.py | tee $(REPORTS_DIR)/themis_integration_tests.txt; \
+		done; \
+	else \
+		pytest -vv test_*.py | tee $(REPORTS_DIR)/themis_integration_tests.txt; \
+	fi
+
+
+.PHONY: run_integration_tests_ORIG
+run_integration_tests_ORIG:
 	@echo "Run Themis integration tests..."
 	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && \
 	cd tests/integration && \
