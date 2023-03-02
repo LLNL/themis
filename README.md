@@ -9,70 +9,76 @@ Themis has been used for simulations in the domains of Inertial Confinement Fusi
 The `themis` package manages the execution of simulations. Given a set of inputs (sample points) to run a simulation on, this package will execute them in parallel, monitor their progress, and collect the results. The `themis` package work with Python 2 and 3.
 
 
-## Basic Installation
+## Installation
 
-### via pip:
-
-```bash
-export THEMIS_PATH = themis                              # `themis` can be any name/directory you want
-pip install virtualenv                                   # just in case
-python3 -m virtualenv $THEMIS_PATH   
-source ${THEMIS_PATH}/bin/activate
-pip install numpy scikit-learn scipy matplotlib networkx
-git clone https://github.com/LLNL/themis
-cd themis
-pip install .
+```
+# Clone the repo
+$ cd <repo_dir>
+$ python3 -m venv --system-site-packages themis_venv
+$ source themis_venv/bin/activate
+$ pip install --trusted-host www-lc.llnl.gov --upgrade pip setuptools
+$ pip install .
+$ pip list
 ```
 
-### via conda:
+## Notes for developers
 
-```bash
-conda create -n themis -c conda-forge "python>=3.6" numpy scikit-learn scipy matplotlib networkx
-conda activate themis
-git clone https://github.com/LLNL/themis
-cd themis
-pip install .
+To make changes and run tests, follow the following steps.
+### Clone the repo
 ```
-## Build Docs
-
-### via pip:
-
-```bash
-pip install sphinx sphinx_rtd_theme
+$ git clone -b develop ssh://git@czgitlab.llnl.gov:7999/weave/themis.git
+$ cd themis
+$ git checkout -b <your branch name>
 ```
-### via conda:
-
-```bash
-conda install -n themis -c conda-forge sphinx sphinx_rtd_theme sphinx-autoapi nbsphinx
+After you create your own branch, you can make any changes to the code and/or tests.
+    
+### Create a test virtual environment
 ```
-
-## Beefy Installation
-
-### via pip:
-
-```bash
-export THEMIS_PATH = themis                           # `themis` can be any name/directory you want
-pip install virtualenv                                # just in case
-python3 -m virtualenv $THEMIS_PATH   
-source ${THEMIS_PATH}/bin/activate
-pip install numpy scikit-learn scipy matplotlib networkx six pip sphinx sphinx_rtd_theme ipython jupyterlab pytest
-git clone https://github.com/LLNL/themis
-cd themis
-pip install .
+$ make create_env
 ```
-### via conda:
+A virtual environment will be created under /usr/workspace/$USER/gitlab/weave/themis/    
 
-```bash
-conda create -n themis -c conda-forge "python>=3.6" numpy scikit-learn scipy matplotlib six pip networkx sphinx sphinx_rtd_theme sphinx-autoapi nbsphinx jupyterlab ipython ipywidgets nb_conda nb_conda_kernels pytest
-conda activate themis
-git clone https://github.com/LLNL/themis
-cd themis
-pip install .
+### Install themis into the test virtual environment
+```
+$ make install
 ```
 
-### Register your Python env via Jupyter:
-
-```bash
-python -m ipykernel install --user --name themis --display-name "Themis Environment"
+### Run unit tests
+```
+$ make run_unit_tests
 ```
 
+### Specify which unit tests to run
+```
+$ ls tests/unit
+$ make run_unit_tests UNIT_TESTS=test_manager
+$ make run_unit_tests UNIT_TESTS=test_runtime
+$ make run_unit_tests UNIT_TESTS="test_runtime test_manager"
+```
+        
+### Run integration tests
+```
+$ make run_integration_tests
+```
+
+### Specify which integration tests to run
+```
+$ make run_integration_tests INTEGRATION_TESTS=test_laptop
+$ make run_integration_tests INTEGRATION_TESTS="test_laptop test_hpc"
+    
+```
+
+### Commit and push your branch. Let CI tests your changes
+```
+$ git commit -a -m"message about your commit"
+$ git push origin <your branch name>
+```
+
+### Notes on CI (Continuous Integration)
+    
+Please take a look at .gitlab-ci.yml. The CI allocates resources by doing salloc, and runs each of the following within an srun:
+- create a test env
+- install Themis
+- run unit tests
+- run integration tests
+and it then releases resources.
