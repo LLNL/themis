@@ -17,7 +17,7 @@ $ cd <repo_dir>
 $ python3 -m venv --system-site-packages themis_venv
 $ source themis_venv/bin/activate
 $ pip install --trusted-host www-lc.llnl.gov --upgrade pip setuptools
-$ python3 setup.py install
+$ pip install .
 $ pip list
 ```
 
@@ -73,3 +73,12 @@ $ make run_integration_tests INTEGRATION_TESTS="test_laptop test_hpc"
 $ git commit -a -m"message about your commit"
 $ git push origin <your branch name>
 ```
+
+### Notes on CI (Continuous Integration)
+    
+Please take a look at .gitlab-ci.yml. The CI allocates resources by doing salloc, and runs each of the following within an srun:
+- create a test env
+- install Themis
+- run unit tests
+- run integration tests
+and it then releases resources.
