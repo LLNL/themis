@@ -9,7 +9,7 @@ RZ_GITLAB = "ssh://git@rzgitlab.llnl.gov:7999"
 PROJECT = "weave/themis.git"
 
 # PIP_OPTIONS = --trusted-host www-lc.llnl.gov
-PIP_OPTIONS = --trusted-host wci-repo.llnl.gov --index-url https://wci-repo.llnl.gov/repository/pypi-group/simple
+PIP_OPTIONS = --trusted-host wci-repo.llnl.gov --index-url https://wci-repo.llnl.gov/repository/pypi-group/simple --use-pep517
 
 REPORTS_DIR = $(USER_WORKSPACE)/gitlab/reports
 
