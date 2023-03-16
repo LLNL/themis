@@ -1,36 +1,25 @@
-variables:
-  ALLOC_NAME: ${CI_PROJECT_NAME}_${CI_PIPELINE_ID}
-  ALLOC_ARGS: "--partition=pdebug --account=wbronze --no-shell --cpus-per-task=1 --no-shell --job-name=${ALLOC_NAME}"
-
 stages:
-  - allocate_resources
   - create_env
   - install
   - run_unit_tests
   - run_integration_tests
-  - release_resources
-  - check_test_results
-        
+    
 .create_env:
   script:
-    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - srun --jobid=${JOBID} --time=1 --nodes=1 make create_env
-    
+    - make create_env
+
 .install:
   script:
-    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - srun --jobid=${JOBID} --time=1 --nodes=1 make install
+    - make install
 
 .run_unit_tests:
   script:
-    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - srun --jobid=${JOBID} --time=2 --nodes=1 make run_unit_tests  
+    - make run_unit_tests
 
 .run_integration_tests:
   script:
-    - JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - srun --jobid=${JOBID} --time=40 --nodes=1 make run_integration_tests
-    
+    - make run_integration_tests
+
 .on_cz:
   tags:
     - shell
@@ -48,19 +37,7 @@ stages:
 .run_on_rz:
   rules:
     - if: '$SOURCE_ZONE == "RZ" && $CI_PIPELINE_SOURCE != "merge_request_event"'
-
-.check_test_results:
-  script:
-    - make check_test_results
     
-allocate_resources_on_cz:
-  extends: [ .on_cz, .run_on_cz ] 
-  variables:
-    GIT_STRATEGY: none
-  stage: allocate_resources
-  script:
-    - salloc --time=45 --nodes=1 ${ALLOC_ARGS}
-        
 create_env_on_cz:
   stage: create_env
   extends: [ .on_cz, .run_on_cz, .create_env ]
@@ -79,29 +56,6 @@ run_integration_tests_on_cz:
   extends: [ .on_cz, .run_on_cz, .run_integration_tests ]
   allow_failure: true
     
-release_resources_on_cz:
-  variables:
-    GIT_STRATEGY: none
-  extends: [ .on_cz, .run_on_cz ]
-  stage: release_resources
-  script:
-    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - ([[ -n "${JOBID}" ]] && scancel ${JOBID})
-  # Releasing the allocation must be done even of pipeline failure.
-  when: always
-
-check_test_results_on_cz:
-  stage: check_test_results
-  extends: [ .on_cz, .run_on_cz, .check_test_results ]
-    
-allocate_resources_on_rz:
-  extends: [ .on_rz, .run_on_rz ] 
-  variables:
-    GIT_STRATEGY: none
-  stage: allocate_resources
-  script:
-    - salloc --time=30 --nodes=1 ${ALLOC_ARGS}
-        
 create_env_on_rz:
   stage: create_env
   extends: [ .on_rz, .run_on_rz, .create_env ]
@@ -118,19 +72,3 @@ run_unit_tests_on_rz:
 run_integration_tests_on_rz:
   stage: run_integration_tests
   extends: [ .on_rz, .run_on_rz, .run_integration_tests ]
-  allow_failure: true
-
-release_resources_on_rz:
-  variables:
-    GIT_STRATEGY: none
-  extends: [ .on_rz, .run_on_rz ]
-  stage: release_resources
-  script:
-    - export JOBID=$(squeue -h --name=${ALLOC_NAME} --format=%A)
-    - ([[ -n "${JOBID}" ]] && scancel ${JOBID})
-  # Releasing the allocation must be done even of pipeline failure.
-  when: always
-
-check_test_results_on_rz:
-  stage: check_test_results
-  extends: [ .on_rz, .run_on_rz, .check_test_results ]
