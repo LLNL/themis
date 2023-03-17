@@ -11,8 +11,6 @@ PROJECT = "weave/themis.git"
 # PIP_OPTIONS = --trusted-host www-lc.llnl.gov
 PIP_OPTIONS = --trusted-host wci-repo.llnl.gov --index-url https://wci-repo.llnl.gov/repository/pypi-group/simple --use-pep517
 
-REPORTS_DIR = $(USER_WORKSPACE)/gitlab/reports
-
 setup:
 	@[ -d $(WORKSPACE) ] || mkdir -p $(WORKSPACE);
 
@@ -48,38 +46,17 @@ run_unit_tests:
 		pytest -vv --capture=tee-sys test_*.py; \
 	fi
 
-.PHONY: run_unit_tests
-run_unit_tests_ORIG:
-	@echo "Run Themis unit tests..."
-	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/unit && \
-	if [ "$(UNIT_TESTS)" ]; then \
-		for t in $(UNIT_TESTS); do \
-			pytest -vv $$t.py | tee $(REPORTS_DIR)/themis_unit_tests.txt; \
-		done; \
-	else \
-		pytest -vv test_*.py | tee $(REPORTS_DIR)/themis_unit_tests.txt; \
-	fi
-
-
 .PHONY: run_integration_tests
 run_integration_tests:
 	@echo "Run Themis integration tests..."
 	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/integration && \
 	if [ "$(INTEGRATION_TESTS)" ]; then \
 		for t in $(INTEGRATION_TESTS); do \
-			pytest -vv $$t.py | tee $(REPORTS_DIR)/themis_integration_tests.txt; \
+			pytest -vv --capture=tee-sys $$t.py
 		done; \
 	else \
-		pytest -vv test_*.py | tee $(REPORTS_DIR)/themis_integration_tests.txt; \
+		pytest -vv --capture=tee-sys test_*.py
 	fi
-
-
-check_test_results:
-	echo "Themis unit tests: "
-	cat $(REPORTS_DIR)/themis_unit_tests.txt
-	echo "Themis integration tests: "
-	cat $(REPORTS_DIR)/themis_integration_tests.txt
-
 
 
 
