@@ -52,10 +52,10 @@ run_integration_tests:
 	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/integration && \
 	if [ "$(INTEGRATION_TESTS)" ]; then \
 		for t in $(INTEGRATION_TESTS); do \
-			pytest -vv --capture=tee-sys $$t.py
+			pytest -vv --capture=tee-sys $$t.py; \
 		done; \
 	else \
-		pytest -vv --capture=tee-sys test_*.py
+		pytest -vv --capture=tee-sys test_*.py; \
 	fi
 
 
