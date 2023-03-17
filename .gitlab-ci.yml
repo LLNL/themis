@@ -3,6 +3,7 @@ stages:
   - install
   - run_unit_tests
   - run_integration_tests
+
     
 .create_env:
   script:
@@ -49,12 +50,11 @@ install_on_cz:
 run_unit_tests_on_cz:
   stage: run_unit_tests
   extends: [ .on_cz, .run_on_cz, .run_unit_tests ]
-  allow_failure: true
     
 run_integration_tests_on_cz:
   stage: run_integration_tests
   extends: [ .on_cz, .run_on_cz, .run_integration_tests ]
-  allow_failure: true
+  when: always
     
 create_env_on_rz:
   stage: create_env
