@@ -42,6 +42,18 @@ run_unit_tests:
 	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/unit && \
 	if [ "$(UNIT_TESTS)" ]; then \
 		for t in $(UNIT_TESTS); do \
+			pytest -vv --capture=tee-sys $$t.py; \
+		done; \
+	else \
+		pytest -vv --capture=tee-sys test_*.py; \
+	fi
+
+.PHONY: run_unit_tests
+run_unit_tests_ORIG:
+	@echo "Run Themis unit tests..."
+	source $(WORKSPACE)/$(THEMIS_ENV)/bin/activate && cd tests/unit && \
+	if [ "$(UNIT_TESTS)" ]; then \
+		for t in $(UNIT_TESTS); do \
 			pytest -vv $$t.py | tee $(REPORTS_DIR)/themis_unit_tests.txt; \
 		done; \
 	else \
