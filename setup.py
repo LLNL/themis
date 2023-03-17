@@ -33,6 +33,7 @@ if __name__ == "__main__":
             "scikit-learn",
             "scipy",
             "matplotlib",
+            "pandas"
         ],
         classifiers=[
             "Programming Language :: Python :: 3",
