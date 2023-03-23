@@ -14,7 +14,7 @@ The `themis` package manages the execution of simulations. Given a set of inputs
 ```
 # Clone the repo
 $ cd <repo_dir>
-$ python3 -m venv --system-site-packages themis_venv
+$ python3 -m venv themis_venv
 $ source themis_venv/bin/activate
 $ pip install --trusted-host www-lc.llnl.gov --upgrade pip setuptools
 $ pip install .
