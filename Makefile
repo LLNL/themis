@@ -8,6 +8,7 @@ CZ_GITLAB = "ssh://git@czgitlab.llnl.gov:7999"
 RZ_GITLAB = "ssh://git@rzgitlab.llnl.gov:7999"
 PROJECT = "weave/themis.git"
 
+PYTHON_CMD = /usr/tce/bin/python3
 # PIP_OPTIONS = --trusted-host www-lc.llnl.gov
 PIP_OPTIONS = --trusted-host wci-repo.llnl.gov --index-url https://wci-repo.llnl.gov/repository/pypi-group/simple --use-pep517
 
@@ -20,12 +21,13 @@ create_env: setup
 	@echo "Create venv for running themis...workspace: $(WORKSPACE)"
 	cd $(WORKSPACE); \
 	if [ -d $(THEMIS_ENV) ]; then rm -rf $(THEMIS_ENV); fi; \
-	/usr/tce/packages/python/python-3.8.2/bin/python3 -m venv $(THEMIS_ENV); \
+	$(PYTHON_CMD) -m venv $(THEMIS_ENV); \
 	source $(THEMIS_ENV)/bin/activate && \
 	pip install $(PIP_OPTIONS) --upgrade pip && \
 	pip install $(PIP_OPTIONS) --upgrade setuptools && \
-	pip install $(PIP_OPTIONS) --force pytest && which pytest
-	@echo "Themis virtual env is created: $(WORKSPACE)/$(THEMIS_VENV)"
+	pip install $(PIP_OPTIONS) --force pytest && which pytest && \
+	pip install $(PIP_OPTIONS) --force mpi4py
+	@echo "Themis virtual env is created: $(WORKSPACE)/$(THEMIS_ENV)"
 
 .PHONY: install
 install:

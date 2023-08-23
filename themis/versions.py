@@ -13,8 +13,10 @@ if sys.version_info.major >= 3:
     import http.client as http_client
     from collections import UserDict
     from urllib.parse import parse_qs, parse_qsl, urlencode
-    from collections.abc import Mapping
-    from collections import Mapping, Sequence
+    try:
+        from collections.abc import Mapping, Sequence
+    except ImportError:
+        from collections import Mapping, Sequence
 
     csvargs = {"newline": ""}  # arguments for opening files with the `csv` module
 

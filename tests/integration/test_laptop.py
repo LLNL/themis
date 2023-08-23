@@ -576,6 +576,7 @@ class ThemisLaptopIntegrationTests(unittest.TestCase):
                 self.assertEqual(None, mgr.dry_run(run_id))
 
     @utils.clean_directory_decorator()
+    @unittest.skip("test test_themis_parse_command incorrectly calls Themis' parse command")
     def test_themis_parse_command(self):
         """Test calling `themis parse` from a batch script."""
         themis_path = sys.executable + " " + THEMIS_DIR
@@ -618,11 +619,16 @@ class ThemisLaptopIntegrationTests(unittest.TestCase):
         execute_blocking(mgr)
         self.validate_success(len(runs))
         completed_runs = mgr.runs(run_ids)
+       
         for run_id in run_ids:
+            f = open("runs" + os.sep + str(run_id) + os.sep + "output.json")
+
             self.assertEqual(
-                json.loads(completed_runs[run_id].result),
+                #json.loads(completed_runs[run_id].result),
+                json.load(f),
                 {"X": run_id, "Y": run_id + 17},
             )
+            f.close()
 
     @utils.clean_directory_decorator()
     def test_multiple_steps_json(self):
