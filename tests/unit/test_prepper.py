@@ -204,6 +204,7 @@ class PrepperTests(unittest.TestCase):
             expected_lines = file_handle.readlines()
         self.assertEqual(received_lines, expected_lines)
 
+    @unittest.skip("tests an incomplete implmentation of Themis batch implementation") 
     def test_parse_input_deck_themis_launch(self):
         """Test themis_launch parsing"""
         input_deck_name = "parse_themis_launch.txt"

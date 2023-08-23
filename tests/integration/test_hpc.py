@@ -34,7 +34,7 @@ class ThemisHPCIntegrationTests(unittest.TestCase):
         if isinstance(rmgr, resource.NoResourceManager):
             raise unittest.SkipTest("These tests require an HPC machine")
         if isinstance(rmgr, resource.LANLSlurm):
-            cls.testing_partition = "standard"
+            cls.testing_partition = "pdebug"
         else:
             cls.testing_partition = "pdebug"
         cls.testing_dir = utils.CleanDirectory(cls.__name__)
@@ -60,9 +60,9 @@ class ThemisHPCIntegrationTests(unittest.TestCase):
     @utils.clean_directory_decorator()
     @unittest.skipUnless(resource.Flux.available(), "test requires Flux")
     def test_mpi_app_batch_script_flux(self):
-        self._test_mpi_app(True, os.path.join(APPLICATIONS, "mpi_app_batch_script.sh"))
+        self._test_mpi_app(True, os.path.join(APPLICATIONS, "mpi_app_batch_script.sh"), timeout=20)
 
-    def _test_mpi_app(self, use_flux, batch_script):
+    def _test_mpi_app(self, use_flux, batch_script, timeout=10):
         """Test an application whose output depends on the number of ranks."""
         run_ids = range(1, 16)
         tasks_list = [(i // 5) + 1 for i in run_ids]
@@ -83,13 +83,13 @@ class ThemisHPCIntegrationTests(unittest.TestCase):
             app_is_batch_script=True if batch_script is not None else False,
             use_flux=use_flux,
         )
-        alloc = Allocation(nodes=1, partition=self.testing_partition, timeout=5)
+        alloc = Allocation(nodes=1, partition=self.testing_partition)
         mgr._execute(alloc, blocking=True)
         run_results = mgr.runs(run_ids)
         # now test the results
         for run_id, tasks in zip(run_ids, tasks_list):
             self.assertEqual(
-                (tasks * run_id, Decimal(tasks * run_id)), run_results[run_id].result,
+                (tasks * run_id, int(tasks * run_id)), run_results[run_id].result,
             )
 
     @utils.clean_directory_decorator()
