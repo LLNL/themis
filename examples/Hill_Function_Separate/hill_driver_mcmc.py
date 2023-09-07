@@ -65,7 +65,3 @@ for name in ['a', 'b', 'c']:
     fig.savefig('{}_post_hist_plot.png'.format(name))
     plt.close(fig)
 
-# fig, ax = plt.subplots(1, 1)
-# mcmc_ana.posterior_predictive_plot('Y_0', ax=ax)
-# fig.savefig('post_prediction.png')
-# plt.close(fig)

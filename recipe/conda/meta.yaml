@@ -1,0 +1,48 @@
+{% set name = "themis" %}
+{% set version = "1.0.0" %}
+
+package:
+    name: {{ name }}
+    version: {{ version }}
+
+source:
+    url: https://github.com/LLNL/themis/archive/v{{ version }}.tar.gz
+    sha256: 
+
+build:
+  number: 0
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  entry_points:
+    - themis = themis:init
+
+requirements:
+  host:
+    - python
+  run:
+    - python
+    - scikit-learn
+    - scipy
+    - numpy
+    - pandas
+    - networkx
+
+test:
+  imports:
+    - trata
+    - llnl-ibis
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+    home:  https://github.com/LLNL/themis
+    summary: 
+    license: BSD 3-Clause
+    license_file: LICENSE
+
+extra:
+  maintainers:
+     - domyancic1
+
