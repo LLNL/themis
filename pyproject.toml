@@ -1,0 +1,80 @@
+[tool]
+[tool.poetry]
+name = "llnl-themis"
+version = "1.0.0"
+description = "A Python-based scientific workflow ensemble manager for running concurrent UQ simulations on high-performance computers."
+license = "BSD 3-Clause License"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers", "Intended Audience :: Education",
+    "Intended Audience :: Science/Research", "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Programming Language :: Python :: 3",
+]
+homepage = "https://github.com/llnl/themis"
+documentation = "https://llnl-themis.readthedocs.io/"
+authors = [
+    "David Domyancic <domyancic1@llnl.gov>", "David Domyancic",
+]
+maintainers = [
+    "David Domyancic <domyancic1@llnl.gov>", "David Domyancic",
+]
+readme = "README.md"
+packages = [
+    {include = 'themis'}
+]
+
+[tool.poetry.dependencies]
+python = ">=3.6"
+numpy = "*"
+pandas = "*"
+scikit-learn = "*"
+scipy = "*"
+matplotlib = "*"
+networkx = "*"
+
+
+[tool.poetry.dev-dependencies]
+sphinx_rtd_theme = "*"
+sphinx = "*"
+pytest = "*"
+networkx = "*"
+nbconvert = "*"
+sphinx-autoapi = "*"
+nbsphinx = "*"
+six = "*"
+
+
+[tool.poetry.plugins."console_scripts"]
+"themis" = "themis.__main__:main"
+"themis-laf" = "themis.laf:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.8", "wheel"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/LLNL/themis/issues"
+"Discussions" = "https://github.com/LLNL/themis/discussions"
+
+[tool.black]
+line-length = 79
+
+[tool.bumpver]
+current_version = "1.0.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = true
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+]
+"README.md" = [
+    "{version}",
+    "{pep440_version}",
+]
+

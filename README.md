@@ -11,74 +11,65 @@ The `themis` package manages the execution of simulations. Given a set of inputs
 
 ## Installation
 
+To get the latest public version:
+
 ```
-# Clone the repo
-$ cd <repo_dir>
-$ python3 -m venv themis_venv
-$ source themis_venv/bin/activate
-$ pip install --trusted-host www-lc.llnl.gov --upgrade pip setuptools
-$ pip install .
-$ pip list
+pip install llnl-themis
+
 ```
 
-## Notes for developers
+To get the latest stable from a cloned repo, simply run:
 
-To make changes and run tests, follow the following steps.
-### Clone the repo
 ```
-$ git clone -b develop ssh://git@czgitlab.llnl.gov:7999/weave/themis.git
-$ cd themis
-$ git checkout -b <your branch name>
-```
-After you create your own branch, you can make any changes to the code and/or tests.
-    
-### Create a test virtual environment
-```
-$ make create_env
-```
-A virtual environment will be created under /usr/workspace/$USER/gitlab/weave/themis/    
+pip install .
 
-### Install themis into the test virtual environment
 ```
-$ make install
+Alternatively, add the path to this repo to your PYTHONPATH environment variable or in your code with:
+
+```
+import sys
+sys.path.append(path_to_themis_repo)
+
 ```
 
-### Run unit tests
-```
-$ make run_unit_tests
+## Documentation
+
+The documentation can be built from the `docs` directory using:
+
+```bash
+make html
 ```
 
-### Specify which unit tests to run
-```
-$ ls tests/unit
-$ make run_unit_tests UNIT_TESTS=test_manager
-$ make run_unit_tests UNIT_TESTS=test_runtime
-$ make run_unit_tests UNIT_TESTS="test_runtime test_manager"
-```
-        
-### Run integration tests
-```
-$ make run_integration_tests
+Read the Docs coming soon.
+
+## Contact Info
+
+Themis maintainer can be reached at: domyancic1@llnl.gov
+
+## Contributing
+
+Contributing to Themis is relatively easy. Just send us a pull request. When you send your request, make develop the destination branch on the Themis repository.
+
+Your PR must pass Themis' unit tests and documentation tests, and must be PEP 8 compliant. We enforce these guidelines with our CI process. To run these tests locally, and for helpful tips on git, see our [Contribution Guide](.github/workflows/CONTRIBUTING.md).
+
+Themis' `develop` branch has the latest contributions. Pull requests should target `develop`, and users who want the latest package versions, features, etc. can use `develop`.
+
+
+Contributions should be submitted as a pull request pointing to the `develop` branch, and must pass Themis' CI process; to run the same checks locally, use:
+
+```bash
+pytest tests/
 ```
 
-### Specify which integration tests to run
-```
-$ make run_integration_tests INTEGRATION_TESTS=test_laptop
-$ make run_integration_tests INTEGRATION_TESTS="test_laptop test_hpc"
-    
-```
+## Releases
+See our [change log](CHANGELOG.md) for more details.
 
-### Commit and push your branch. Let CI tests your changes
-```
-$ git commit -a -m"message about your commit"
-$ git push origin <your branch name>
-```
+## Code of Conduct
+Please note that Themis has a [Code of Conduct](.github/workflows/CODE_OF_CONDUCT.md). By participating in the Themis community, you agree to abide by its rules.
 
-### Notes on CI (Continuous Integration)
-    
-Please take a look at .gitlab-ci.yml. The CI allocates resources by doing salloc, and runs each of the following within an srun:
-- create a test env
-- install Themis
-- run unit tests
-- run integration tests
-and it then releases resources.
+## License
+
+Themis is distributed under the terms of the MIT license. All new contributions must be made under the MIT license. See LICENSE and NOTICE for details.
+
+LLNL-CODE-838977
+
